@@ -12,5 +12,5 @@ else
 fi
 echo
 
-# Make labeled data
-python make_data.py
+# Split dataset into train and test
+python split_data.py
