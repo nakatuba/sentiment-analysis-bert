@@ -1,4 +1,4 @@
-# sentiment-analysis-bert
+# wrime-bert
 
 1. Install python modules
 ```
