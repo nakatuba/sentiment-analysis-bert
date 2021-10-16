@@ -397,20 +397,6 @@ python-versions = ">=3.6.2"
 typing-extensions = "*"
 
 [[package]]
-name = "torchtext"
-version = "0.10.1"
-description = "Text utilities and datasets for PyTorch"
-category = "main"
-optional = false
-python-versions = ">=3.5"
-
-[package.dependencies]
-numpy = "*"
-requests = "*"
-torch = "1.9.1"
-tqdm = "*"
-
-[[package]]
 name = "tqdm"
 version = "4.62.3"
 description = "Fast, Extensible Progress Meter"
@@ -506,7 +492,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "bc2d606627e829db7c8661b2f1582c16bb34d10c84953511bc889e293afd5d0f"
+content-hash = "397e036cc8eb6c153c7077680d4bc31bc4932402459624318ec255e6499876e2"
 
 [metadata.files]
 black = [
@@ -849,20 +835,6 @@ torch = [
     {file = "torch-1.9.1-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:35ec703bc535bde7e8790ab9500f02d4413d995ac981520501fde95e268781e1"},
     {file = "torch-1.9.1-cp39-cp39-win_amd64.whl", hash = "sha256:e470697006a4c08e4fb6a645e8ca49b0d36c8e7ccf413deef5161335bd7399f1"},
     {file = "torch-1.9.1-cp39-none-macosx_10_9_x86_64.whl", hash = "sha256:a198332e2d344d25e423ae2df98d56d83060f19e9f4cf23164dffc8d403efeb8"},
-]
-torchtext = [
-    {file = "torchtext-0.10.1-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:6f4c0bb24f5f06cb5d636548ac99b4d2aba3449f9f8a0c0f53b8712dbd9b8618"},
-    {file = "torchtext-0.10.1-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:0e0d658143761aaf386bf7e9b6e209e01beea5e96ffe3698ea81228b31d2283e"},
-    {file = "torchtext-0.10.1-cp36-cp36m-win_amd64.whl", hash = "sha256:52d4d22a744adfa344d90c4ebc77d0ac38a4ebdf09fa2ecfa64f339212e68ca2"},
-    {file = "torchtext-0.10.1-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:85d06b4e71fd65695e391b8d614c0c0c12e71f1dc45380fece85036129bd0b80"},
-    {file = "torchtext-0.10.1-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:17a1e84b8fc33ba92b02635cc2471f98c27290dbaa0e43e5d442bc3d172285a6"},
-    {file = "torchtext-0.10.1-cp37-cp37m-win_amd64.whl", hash = "sha256:051a001ab760e459c361719aca181643ca9c0e5212f5ea4213da0e441520145e"},
-    {file = "torchtext-0.10.1-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:d67230cc28df7dd2be6fe6f62de7910bfb3dff8703197d34d1ff56d7103453e1"},
-    {file = "torchtext-0.10.1-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:f10ed1e2751cc56958cbda11639bd56bb3c96d0923a9ff8da0e6771591ad2ad5"},
-    {file = "torchtext-0.10.1-cp38-cp38-win_amd64.whl", hash = "sha256:bec6a60e0420323df356366d266d0caff1ee27e86edf593274824af95b3cc488"},
-    {file = "torchtext-0.10.1-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:46e14c39f52c5db4376bccbaa05ab2122489fdd152f592c1f5f891bc6c8e86e9"},
-    {file = "torchtext-0.10.1-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:9d28b712f921a0407ce61af81c3dc07c48cab56f83d5f72f9a8ed3a4a200dad2"},
-    {file = "torchtext-0.10.1-cp39-cp39-win_amd64.whl", hash = "sha256:bc237e62488c14374cfbcca630045cfba031905fde629eed1ce29a459981e07e"},
 ]
 tqdm = [
     {file = "tqdm-4.62.3-py2.py3-none-any.whl", hash = "sha256:8dd278a422499cd6b727e6ae4061c40b48fce8b76d1ccbf5d34fca9b7f925b0c"},
