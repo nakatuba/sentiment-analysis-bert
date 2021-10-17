@@ -11,3 +11,6 @@ else
   sed -i "" -e "1s/Saddness/Sadness/g" wrime.tsv
 fi
 echo
+
+# Split dataset into train and test
+python split_data.py
