@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from sklearn.metrics import classification_report, mean_absolute_error
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, WeightedRandomSampler
 from transformers import BertJapaneseTokenizer
 
 from model import Bert
@@ -12,9 +12,9 @@ from utils.dataset import WrimeDataset
 def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    train_dataset = WrimeDataset(split="train", label="Avg. Readers_Joy")
-    valid_dataset = WrimeDataset(split="dev", label="Avg. Readers_Joy")
-    test_dataset = WrimeDataset(split="test", label="Avg. Readers_Joy")
+    train_dataset = WrimeDataset(split="train", label="Avg. Readers_Anger")
+    valid_dataset = WrimeDataset(split="dev", label="Avg. Readers_Anger")
+    test_dataset = WrimeDataset(split="test", label="Avg. Readers_Anger")
 
     tokenizer = BertJapaneseTokenizer.from_pretrained(
         "cl-tohoku/bert-base-japanese-whole-word-masking"
@@ -32,8 +32,13 @@ def main():
 
     batch_size = 32
 
+    weights = [
+        1 / (train_dataset.labels == label).sum() for label in train_dataset.labels
+    ]
+    sampler = WeightedRandomSampler(weights=weights, num_samples=len(weights))
+
     train_dataloader = DataLoader(
-        train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_batch
+        train_dataset, batch_size=batch_size, sampler=sampler, collate_fn=collate_batch
     )
     valid_dataloader = DataLoader(
         valid_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_batch
