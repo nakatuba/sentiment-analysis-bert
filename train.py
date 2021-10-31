@@ -1,19 +1,20 @@
+import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from sklearn.metrics import classification_report, mean_absolute_error
+from sklearn.metrics import classification_report, roc_auc_score
 from torch.utils.data import DataLoader, WeightedRandomSampler
 from transformers import BertJapaneseTokenizer
 
-from model import Bert
+from model import BertClassifier
 from utils.dataset import WrimeDataset
 
 
 def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    train_dataset = WrimeDataset(path="./data/train.tsv", label="Avg. Readers_Anger")
-    test_dataset = WrimeDataset(path="./data/test.tsv", label="Avg. Readers_Anger")
+    train_dataset = WrimeDataset(path="./data/train.tsv", label="gap")
+    test_dataset = WrimeDataset(path="./data/test.tsv", label="gap")
 
     tokenizer = BertJapaneseTokenizer.from_pretrained(
         "cl-tohoku/bert-base-japanese-whole-word-masking"
@@ -22,8 +23,7 @@ def main():
     def collate_batch(batch):
         input_list = tokenizer(
             [text for text, _ in batch],
-            max_length=32,
-            padding="max_length",
+            padding=True,
             truncation=True,
             return_tensors="pt",
         )
@@ -44,8 +44,12 @@ def main():
         test_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_batch
     )
 
-    model = Bert(num_labels=4).to(device)
-    criterion = nn.CrossEntropyLoss()
+    model = BertClassifier(num_labels=2).to(device)
+    weight = torch.tensor(
+        [1 / (train_dataset.labels == label).sum() for label in range(2)],
+        dtype=torch.float,
+    )
+    criterion = nn.CrossEntropyLoss(weight=weight).to(device)
     optimizer = optim.Adam(model.parameters(), lr=2e-5)
 
     num_epochs = 3
@@ -57,15 +61,20 @@ def main():
     model.eval()
     y_true = []
     y_pred = []
+    y_score = []
 
     with torch.no_grad():
         for input, label in test_dataloader:
             output = model(input)
             y_true += label.tolist()
             y_pred += output.argmax(dim=1).tolist()
+            y_score += output[:, 1].tolist()
 
     print(classification_report(y_true, y_pred))
-    print("MAE:", mean_absolute_error(y_true, y_pred))
+    print("AUC:", roc_auc_score(y_true, y_score))
+
+    os.makedirs("./models", exist_ok=True)
+    torch.save(model.state_dict(), "./models/gap_anger_model.pt")
 
 
 def train(model, dataloader, criterion, optimizer):
