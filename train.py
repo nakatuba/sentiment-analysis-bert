@@ -9,6 +9,7 @@ from transformers import BertJapaneseTokenizer
 
 from model import BertClassifier
 from utils.dataset import WrimeDataset
+from utils.trainer import train
 
 
 @hydra.main(config_path="config", config_name="config")
@@ -16,10 +17,16 @@ def main(cfg):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     train_dataset = WrimeDataset(
-        path=to_absolute_path("./data/train.tsv"), label=cfg.label
+        path=to_absolute_path("./data/train.tsv"),
+        target=cfg.label.target,
+        sentiment=cfg.label.sentiment,
+        binary=cfg.label.binary,
     )
     test_dataset = WrimeDataset(
-        path=to_absolute_path("./data/test.tsv"), label=cfg.label
+        path=to_absolute_path("./data/test.tsv"),
+        target=cfg.label.target,
+        sentiment=cfg.label.sentiment,
+        binary=cfg.label.binary,
     )
 
     tokenizer = BertJapaneseTokenizer.from_pretrained(
@@ -85,29 +92,6 @@ def main(cfg):
     print(classification_report(y_true, y_pred))
 
     torch.save(model.state_dict(), "./model.pt")
-
-
-def train(model, dataloader, criterion, optimizer):
-    model.train()
-    epoch_loss = 0
-    epoch_acc = 0
-
-    for input, label in dataloader:
-        output = model(input)
-
-        loss = criterion(output, label)
-
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-        pred = output.argmax(dim=1)
-        acc = (pred == label).sum() / len(pred)
-
-        epoch_loss += loss.item()
-        epoch_acc += acc.item()
-
-    return epoch_loss / len(dataloader), epoch_acc / len(dataloader)
 
 
 if __name__ == "__main__":

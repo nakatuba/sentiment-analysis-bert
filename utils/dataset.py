@@ -3,20 +3,20 @@ from torch.utils.data import Dataset
 
 
 class WrimeDataset(Dataset):
-    def __init__(self, path, label):
+    def __init__(self, path, target, sentiment, binary):
         df = pd.read_csv(path, sep="\t")
         self.texts = df["Sentence"].values
 
-        sentiment = label.sentiment.capitalize()
+        sentiment = sentiment.capitalize()
 
-        if label.target == "writer":
+        if target == "writer":
             self.labels = df[f"Writer_{sentiment}"]
-        elif label.target == "reader":
+        elif target == "reader":
             self.labels = df[f"Avg. Readers_{sentiment}"]
-        elif label.target == "gap":
+        elif target == "gap":
             self.labels = df[f"Writer_{sentiment}"] - df[f"Avg. Readers_{sentiment}"]
 
-        if label.binary:
+        if binary:
             self.labels = (self.labels > 1).astype(int)
 
         self.labels = self.labels.values

@@ -12,18 +12,10 @@ class BertClassifier(nn.Module):
         self.linear = nn.Linear(self.bert.config.hidden_size, output_dim)
 
     def forward(self, input, output_attentions=False):
-        if output_attentions:
-            _, pooler_output, attentions = self.bert(
-                **input, output_attentions=True, return_dict=False
-            )
-        else:
-            _, pooler_output = self.bert(
-                **input, output_attentions=False, return_dict=False
-            )
+        _, pooler_output, attentions = self.bert(
+            **input, output_attentions=True, return_dict=False
+        )
         output = self.dropout(pooler_output)
         output = self.linear(output)
 
-        if output_attentions:
-            return output, attentions
-        else:
-            return output
+        return (output, attentions) if output_attentions else output
