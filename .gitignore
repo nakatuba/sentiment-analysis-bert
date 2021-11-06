@@ -3,4 +3,4 @@
 __pycache__/
 data/*
 !data/*.py
-models/
+outputs/

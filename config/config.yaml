@@ -1,0 +1,8 @@
+label:
+  target: 'gap'
+  sentiment: 'anger'
+  binary: true
+train:
+  batch_size: 32
+  learning_rate: 2e-5
+  num_epochs: 3

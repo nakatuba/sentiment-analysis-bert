@@ -1,8 +1,9 @@
-import os
+import hydra
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from sklearn.metrics import classification_report, roc_auc_score
+from hydra.utils import to_absolute_path
+from sklearn.metrics import classification_report
 from torch.utils.data import DataLoader, WeightedRandomSampler
 from transformers import BertJapaneseTokenizer
 
@@ -10,11 +11,16 @@ from model import BertClassifier
 from utils.dataset import WrimeDataset
 
 
-def main():
+@hydra.main(config_path="config", config_name="config")
+def main(cfg):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    train_dataset = WrimeDataset(path="./data/train.tsv", label="gap")
-    test_dataset = WrimeDataset(path="./data/test.tsv", label="gap")
+    train_dataset = WrimeDataset(
+        path=to_absolute_path("./data/train.tsv"), label=cfg.label
+    )
+    test_dataset = WrimeDataset(
+        path=to_absolute_path("./data/test.tsv"), label=cfg.label
+    )
 
     tokenizer = BertJapaneseTokenizer.from_pretrained(
         "cl-tohoku/bert-base-japanese-whole-word-masking"
@@ -30,51 +36,55 @@ def main():
         label_list = torch.tensor([label for _, label in batch])
         return input_list.to(device), label_list.to(device)
 
-    batch_size = 32
-
     weights = [
         1 / (train_dataset.labels == label).sum() for label in train_dataset.labels
     ]
     sampler = WeightedRandomSampler(weights=weights, num_samples=len(weights))
 
     train_dataloader = DataLoader(
-        train_dataset, batch_size=batch_size, sampler=sampler, collate_fn=collate_batch
+        train_dataset,
+        batch_size=cfg.train.batch_size,
+        sampler=sampler,
+        collate_fn=collate_batch,
     )
     test_dataloader = DataLoader(
-        test_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_batch
+        test_dataset,
+        batch_size=cfg.train.batch_size,
+        shuffle=False,
+        collate_fn=collate_batch,
     )
 
-    model = BertClassifier(num_labels=2).to(device)
+    num_classes = 2 if cfg.label.binary else 4
+
     weight = torch.tensor(
-        [1 / (train_dataset.labels == label).sum() for label in range(2)],
+        [1 / (train_dataset.labels == label).sum() for label in range(num_classes)],
         dtype=torch.float,
     )
-    criterion = nn.CrossEntropyLoss(weight=weight).to(device)
-    optimizer = optim.Adam(model.parameters(), lr=2e-5)
 
-    num_epochs = 3
+    model = BertClassifier(output_dim=num_classes).to(device)
+    criterion = nn.CrossEntropyLoss(weight=weight).to(device)
+    optimizer = optim.Adam(model.parameters(), lr=cfg.train.learning_rate)
+
+    num_epochs = cfg.train.num_epochs
     for epoch in range(num_epochs):
         train_loss, train_acc = train(model, train_dataloader, criterion, optimizer)
-        print(f"Epoch {epoch + 1}/{num_epochs}", end=" ")
-        print(f"| train | Loss: {train_loss:.4f} Accuracy: {train_acc:.4f}")
+        print(
+            f"Epoch {epoch + 1}/{num_epochs} | train | Loss: {train_loss:.4f} Accuracy: {train_acc:.4f}"
+        )
 
     model.eval()
     y_true = []
     y_pred = []
-    y_score = []
 
     with torch.no_grad():
         for input, label in test_dataloader:
             output = model(input)
             y_true += label.tolist()
             y_pred += output.argmax(dim=1).tolist()
-            y_score += output[:, 1].tolist()
 
     print(classification_report(y_true, y_pred))
-    print("AUC:", roc_auc_score(y_true, y_score))
 
-    os.makedirs("./models", exist_ok=True)
-    torch.save(model.state_dict(), "./models/gap_anger_model.pt")
+    torch.save(model.state_dict(), "./model.pt")
 
 
 def train(model, dataloader, criterion, optimizer):

@@ -3,13 +3,13 @@ from transformers import BertModel
 
 
 class BertClassifier(nn.Module):
-    def __init__(self, num_labels):
+    def __init__(self, output_dim):
         super().__init__()
         self.bert = BertModel.from_pretrained(
             "cl-tohoku/bert-base-japanese-whole-word-masking"
         )
         self.dropout = nn.Dropout(0.1)
-        self.linear = nn.Linear(self.bert.config.hidden_size, num_labels)
+        self.linear = nn.Linear(self.bert.config.hidden_size, output_dim)
 
     def forward(self, input, output_attentions=False):
         if output_attentions:
