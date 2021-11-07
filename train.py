@@ -1,4 +1,5 @@
 import hydra
+import pandas as pd
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -91,7 +92,12 @@ def main(cfg):
 
     print(classification_report(y_true, y_pred))
 
-    torch.save(model.state_dict(), "./model.pt")
+    df = pd.read_csv(to_absolute_path("./data/test.tsv"), sep="\t")
+    df["GT"] = y_true
+    df["Predicted"] = y_pred
+    df.to_csv("result.tsv", sep="\t", index=False)
+
+    torch.save(model.state_dict(), "model.pt")
 
 
 if __name__ == "__main__":
