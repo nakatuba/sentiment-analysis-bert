@@ -3,11 +3,9 @@ from transformers import BertModel
 
 
 class BertClassifier(nn.Module):
-    def __init__(self, output_dim):
+    def __init__(self, pretrained_model, output_dim):
         super().__init__()
-        self.bert = BertModel.from_pretrained(
-            "cl-tohoku/bert-base-japanese-whole-word-masking"
-        )
+        self.bert = BertModel.from_pretrained(pretrained_model)
         self.dropout = nn.Dropout(0.1)
         self.linear = nn.Linear(self.bert.config.hidden_size, output_dim)
 

@@ -1,7 +1,12 @@
+data:
+  train_path: './data/train.tsv'
+  test_path: './data/test.tsv'
 label:
   target: 'gap'
   sentiment: 'anger'
-  binary: true
+  num_classes: 2
+model:
+  pretrained_model: 'cl-tohoku/bert-base-japanese-whole-word-masking'
 train:
   batch_size: 32
   learning_rate: 2e-5

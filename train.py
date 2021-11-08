@@ -18,21 +18,19 @@ def main(cfg):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     train_dataset = WrimeDataset(
-        path=to_absolute_path("./data/train.tsv"),
+        path=to_absolute_path(cfg.data.train_path),
         target=cfg.label.target,
         sentiment=cfg.label.sentiment,
-        binary=cfg.label.binary,
+        num_classes=cfg.label.num_classes,
     )
     test_dataset = WrimeDataset(
-        path=to_absolute_path("./data/test.tsv"),
+        path=to_absolute_path(cfg.data.test_path),
         target=cfg.label.target,
         sentiment=cfg.label.sentiment,
-        binary=cfg.label.binary,
+        num_classes=cfg.label.num_classes,
     )
 
-    tokenizer = BertJapaneseTokenizer.from_pretrained(
-        "cl-tohoku/bert-base-japanese-whole-word-masking"
-    )
+    tokenizer = BertJapaneseTokenizer.from_pretrained(cfg.model.pretrained_model)
 
     def collate_batch(batch):
         input_list = tokenizer(
@@ -62,14 +60,18 @@ def main(cfg):
         collate_fn=collate_batch,
     )
 
-    num_classes = 2 if cfg.label.binary else 4
-
     weight = torch.tensor(
-        [1 / (train_dataset.labels == label).sum() for label in range(num_classes)],
+        [
+            1 / (train_dataset.labels == label).sum()
+            for label in range(cfg.label.num_classes)
+        ],
         dtype=torch.float,
     )
 
-    model = BertClassifier(output_dim=num_classes).to(device)
+    model = BertClassifier(
+        pretrained_model=cfg.model.pretrained_model,
+        output_dim=cfg.label.num_classes,
+    ).to(device)
     criterion = nn.CrossEntropyLoss(weight=weight).to(device)
     optimizer = optim.Adam(model.parameters(), lr=cfg.train.learning_rate)
 
@@ -92,7 +94,7 @@ def main(cfg):
 
     print(classification_report(y_true, y_pred))
 
-    df = pd.read_csv(to_absolute_path("./data/test.tsv"), sep="\t")
+    df = pd.read_csv(to_absolute_path(cfg.data.test_path), sep="\t")
     df["GT"] = y_true
     df["Predicted"] = y_pred
     df.to_csv("result.tsv", sep="\t", index=False)
