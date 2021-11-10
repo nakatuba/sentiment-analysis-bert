@@ -1,3 +1,5 @@
+wandb:
+  project: 'wrime-bert'
 data:
   train_path: './data/train.tsv'
   test_path: './data/test.tsv'

@@ -1,10 +1,15 @@
+import os
+
 import hydra
+import matplotlib.pyplot as plt
 import pandas as pd
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import wandb
 from hydra.utils import to_absolute_path
-from sklearn.metrics import classification_report
+from omegaconf import OmegaConf
+from sklearn.metrics import classification_report, roc_auc_score, roc_curve
 from torch.utils.data import DataLoader, WeightedRandomSampler
 from transformers import BertJapaneseTokenizer
 
@@ -15,6 +20,8 @@ from utils.trainer import train
 
 @hydra.main(config_path="config", config_name="config")
 def main(cfg):
+    wandb.init(project=cfg.wandb.project, config=OmegaConf.to_container(cfg))
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     train_dataset = WrimeDataset(
@@ -85,21 +92,35 @@ def main(cfg):
     model.eval()
     y_true = []
     y_pred = []
+    y_score = []
 
     with torch.no_grad():
         for input, label in test_dataloader:
             output = model(input)
             y_true += label.tolist()
             y_pred += output.argmax(dim=1).tolist()
+            y_score += output[:, 1].tolist()
 
-    print(classification_report(y_true, y_pred))
+    print(classification_report(y_true, y_pred, digits=3))
+
+    fpr, tpr, _ = roc_curve(y_true, y_score)
+    auc = roc_auc_score(y_true, y_score)
+
+    plt.rcParams["font.size"] = 20
+    plt.plot(fpr, tpr, label=f"AUC = {auc:.3f}")
+    plt.xlabel("1 - Specificity")
+    plt.ylabel("Sensitivity")
+    plt.legend(loc="lower right")
+    plt.tight_layout()
+
+    wandb.log({"ROC curve": wandb.Image(plt), "AUC": auc})
 
     df = pd.read_csv(to_absolute_path(cfg.data.test_path), sep="\t")
     df["GT"] = y_true
     df["Predicted"] = y_pred
-    df.to_csv("result.tsv", sep="\t", index=False)
+    df.to_csv(os.path.join(wandb.run.dir, "result.tsv"), sep="\t", index=False)
 
-    torch.save(model.state_dict(), "model.pt")
+    torch.save(model.state_dict(), os.path.join(wandb.run.dir, "model.pt"))
 
 
 if __name__ == "__main__":
