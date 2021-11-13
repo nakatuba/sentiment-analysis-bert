@@ -10,6 +10,7 @@ label:
   num_classes: 2
 model:
   pretrained_model: 'cl-tohoku/bert-base-japanese-whole-word-masking'
+  dropout_prob: 0.1
 train:
   batch_size: 32
   learning_rate: 2e-5

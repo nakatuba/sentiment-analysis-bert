@@ -81,6 +81,7 @@ def main(cfg):
 
     model = BertClassifier(
         pretrained_model=cfg.model.pretrained_model,
+        dropout_prob=cfg.model.dropout_prob,
         output_dim=cfg.label.num_classes,
     ).to(device)
     criterion = nn.CrossEntropyLoss(weight=weight).to(device)

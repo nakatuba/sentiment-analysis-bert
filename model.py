@@ -3,10 +3,10 @@ from transformers import BertModel
 
 
 class BertClassifier(nn.Module):
-    def __init__(self, pretrained_model, output_dim):
+    def __init__(self, pretrained_model, dropout_prob, output_dim):
         super().__init__()
         self.bert = BertModel.from_pretrained(pretrained_model)
-        self.dropout = nn.Dropout(0.1)
+        self.dropout = nn.Dropout(dropout_prob)
         self.linear = nn.Linear(self.bert.config.hidden_size, output_dim)
 
     def forward(self, input, output_attentions=False):
