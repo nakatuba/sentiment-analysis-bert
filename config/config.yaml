@@ -1,5 +1,6 @@
 wandb:
   project: 'wrime-bert'
+  mode: 'online'
 data:
   train_path: './data/train.tsv'
   test_path: './data/test.tsv'

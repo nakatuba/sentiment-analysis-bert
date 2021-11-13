@@ -20,7 +20,11 @@ from utils.trainer import train
 
 @hydra.main(config_path="config", config_name="config")
 def main(cfg):
-    wandb.init(project=cfg.wandb.project, config=OmegaConf.to_container(cfg))
+    wandb.init(
+        project=cfg.wandb.project,
+        config=OmegaConf.to_container(cfg),
+        mode=cfg.wandb.mode,
+    )
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
