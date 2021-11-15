@@ -5,7 +5,7 @@ from torch.utils.data import Dataset
 class WrimeDataset(Dataset):
     def __init__(self, path, target, sentiment, num_classes):
         df = pd.read_csv(path, sep="\t")
-        df["Sentence"] = df["Sentence"].replace(r"\\n", "", regex=True)
+        df["Sentence"] = df["Sentence"].replace(r"\\n", " ", regex=True)
         self.texts = df["Sentence"].values
 
         sentiment = sentiment.capitalize()
