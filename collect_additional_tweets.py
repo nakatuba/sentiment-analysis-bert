@@ -13,7 +13,6 @@ import pandas as pd
 import requests
 from dotenv import load_dotenv
 from requests.exceptions import RequestException
-from retry import retry
 from tqdm import tqdm
 
 # Requests per 15-minute window unless otherwise stated
@@ -104,11 +103,6 @@ def get_tweet_datetime(
     return f"{dt.isoformat()}.0000+00:00"
 
 
-# @retry(
-#     exceptions=(RequestException),
-#     # Requests per 15-minute window unless otherwise stated
-#     delay=RATE_LIMITS_SLEEP,
-# )
 def search_tweet(
     query_params: Dict[str, Any],
     bearer_token: str,
