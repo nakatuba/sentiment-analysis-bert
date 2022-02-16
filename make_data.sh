@@ -1,7 +1,7 @@
 cd data
 
 # Download wrime dataset
-curl -O https://raw.githubusercontent.com/ids-cv/wrime/master/wrime.tsv
+curl https://raw.githubusercontent.com/ids-cv/wrime/master/wrime-ver1.tsv -o wrime.tsv
 
 # Fix column name
 if sed --version > /dev/null 2>&1; then
